@@ -6,10 +6,18 @@ project('Build System Playgroung',
 
 # Add anything that we depend on in order us to build correctly.
 thread_dep = dependency('threads')
+gtest_dep = dependency('gtest', main : true)
 
 # Specify what we want our binary to be called.
-executable('build_system_playground', 
-           'src/build_system_playground/main.cpp',
-           dependencies : [thread_dep]
-           )
+exe = executable('build_system_playground', 
+                 'src/build_system_playground/main.cpp',
+                 dependencies : [thread_dep]
+                 )
 
+# This will creat our Google Test 
+test_exe = executable('test_simple_test',
+                      'test/simple_test.cpp',
+                      dependencies : [gtest_dep]
+                      )
+
+test('Simple Google test', test_exe)
