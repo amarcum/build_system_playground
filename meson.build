@@ -7,11 +7,22 @@ project('Build System Playgroung',
 # Add anything that we depend on in order us to build correctly.
 thread_dep = dependency('threads')
 gtest_dep = dependency('gtest', main : true)
+jsondep = dependency('jsoncpp')
+
+dep = dependency('json_parser', required: false)
+
+if dep.found()
+    #
+else
+    subproject('json_parser')
+endif
+ 
+#jsondep = meson.get_compiler('cpp').find_library('jsoncpp', dirs: '/lib64')
 
 # Specify what we want our binary to be called.
 exe = executable('build_system_playground', 
                  'src/build_system_playground/main.cpp',
-                 dependencies : [thread_dep]
+                 dependencies : [thread_dep, jsondep, dep]
                  )
 
 # This will creat our Google Test 
