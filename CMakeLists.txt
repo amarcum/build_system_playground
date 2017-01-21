@@ -25,10 +25,46 @@ enable_testing()
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
+# add a target to generate API documentation with Doxygen
+find_package(Doxygen)
+option(BUILD_DOCUMENTATION "Create and install the HTML based API        
+documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+
+if(BUILD_DOCUMENTATION)
+    if(NOT DOXYGEN_FOUND)
+         message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+    endif()
+
+    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in)
+    set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/doxyfile)
+
+    configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+
+    message("Doxygen build started.")
+
+    add_custom_target(doc ALL
+                      COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile_in}
+                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
+                      COMMENT "Generating API documentation with Doxygen"
+                      VERBATIM)
+
+   install(DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/doc/html DESTINATION share/doc)
+endif()
+
+
+
 # Create Test Executable. CMake allows one to create multiple test executables if 
 # one wants to break down the testing by module
 add_executable(build_system_playground_test test/simple_test.cpp)
 target_link_libraries(build_system_playground_test ${GTEST_BOTH_LIBRARIES})
+
+find_program( VALGRIND valgrind )
+
+if(VALGRIND)
+    add_custom_target(ci ALL
+        COMMAND "${VALGRIND}" --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes $<TARGET_FILE:build_system_playground_test>)
+endif()
+
 
 # Add the tests to be run. This is what runs when ninja-build test or make test (if using
 # GNU Make).
