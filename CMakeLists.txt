@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.1)
 include(project.cmake)
 
 # Set the project name
-project (build_system_playground)
+project (${PROJECT_NAME})
 
 #compiler options setup
 #set(CMAKE_CXX_STANDARD 14)
@@ -13,7 +13,7 @@ option(MULTITHREAD_SUPPORT_ENABLED "Multithreaded Support Enabled" TRUE)
 set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++1z" )
 
 #declare library object to be built
-add_library(build_system_playground SHARED src/build_system_playground/main.cpp)
+add_library(${PROJECT_NAME} SHARED src/${PROJECT_NAME}/main.cpp)
 
 # Enable testing modules
 enable_testing()
@@ -32,18 +32,23 @@ if(BUILD_DOCUMENTATION)
          message(FATAL_ERROR "Doxygen is needed to build the documentation.")
     endif()
 
-    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in)
+    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
     set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/doxyfile)
 
     configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 
     message("Doxygen build started.")
 
-    add_custom_target(doc ALL
+    add_custom_target(doc
                       COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile_in}
                       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
                       COMMENT "Generating API documentation with Doxygen"
-                      VERBATIM)
+                      )
+    
+    add_custom_target(uninstall
+                      COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/doc/*
+                      
+                      )
 
    install(DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/doc/html DESTINATION share/doc)
 endif()
@@ -52,14 +57,14 @@ endif()
 
 # Create Test Executable. CMake allows one to create multiple test executables if 
 # one wants to break down the testing by module
-add_executable(build_system_playground_test test/simple_test.cpp)
-target_link_libraries(build_system_playground_test ${GTEST_BOTH_LIBRARIES})
+add_executable(${PROJECT_NAME}_test test/simple_test.cpp)
+target_link_libraries(${PROJECT_NAME}_test ${GTEST_BOTH_LIBRARIES})
 
 find_program( VALGRIND valgrind )
 
 if(VALGRIND)
-    add_custom_target(ci ALL
-        COMMAND "${VALGRIND}" --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes $<TARGET_FILE:build_system_playground_test>)
+    add_custom_target(ci
+        COMMAND "${VALGRIND}" --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes $<TARGET_FILE:${PROJECT_NAME}_test>)
 endif()
 
 # Add the tests to be run. This is what runs when ninja-build test or make test (if using
