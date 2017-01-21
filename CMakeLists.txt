@@ -2,13 +2,10 @@
 # CXX 11 and 14 out of the box. CXX 17 can be used by setting the CXX Flags
 cmake_minimum_required (VERSION 3.1)
 
-set(MAJOR_VERSION 1)
-set(MINOR_VERSION 0)
-set(PATCH_VERSION 4)
+include(project.cmake)
 
 # Set the project name
 project (build_system_playground)
-
 
 #compiler options setup
 #set(CMAKE_CXX_STANDARD 14)
@@ -64,7 +61,6 @@ if(VALGRIND)
     add_custom_target(ci ALL
         COMMAND "${VALGRIND}" --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes $<TARGET_FILE:build_system_playground_test>)
 endif()
-
 
 # Add the tests to be run. This is what runs when ninja-build test or make test (if using
 # GNU Make).
