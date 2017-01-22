@@ -45,7 +45,7 @@ if(BUILD_DOCUMENTATION)
                       COMMENT "Generating API documentation with Doxygen"
                       )
     
-    add_custom_target(uninstall
+    add_custom_target(doc-clean
                       COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/doc/*
                       
                       )
