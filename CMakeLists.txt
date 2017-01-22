@@ -12,8 +12,22 @@ project (${PROJECT_NAME})
 option(MULTITHREAD_SUPPORT_ENABLED "Multithreaded Support Enabled" TRUE)
 set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++1z" )
 
+# bring in external lib dependency
+
+
+#glob cpp files
+FILE(GLOB SRC_FILES src/${PROJECT_NAME}/*.cpp)
+
+# glob header files
+FILE(GLOB HEADER_FILES src/${PROJECT_NAME}/*.h)
+
 #declare library object to be built
-add_library(${PROJECT_NAME} SHARED src/${PROJECT_NAME}/main.cpp)
+add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
+
+# Add JsonCPP lib to lib
+target_link_libraries(${PROJECT_NAME} jsoncpp) 
+
+
 
 # Enable testing modules
 enable_testing()
@@ -45,7 +59,7 @@ if(BUILD_DOCUMENTATION)
                       COMMENT "Generating API documentation with Doxygen"
                       )
     
-    add_custom_target(uninstall
+    add_custom_target(doc-clean
                       COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/doc/*
                       
                       )
@@ -74,6 +88,7 @@ add_test(AllTestsInBuildSystemPlaygroundTests build_system_playground_test)
 # Create a deployable installer. AKA: Packaging. We will use Red Hat Package Manager with CPack
 # Whether to build on fedora
 install(TARGETS build_system_playground LIBRARY DESTINATION lib64)
+install(FILES ${HEADER_FILES} DESTINATION include)
 SET(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_GENERATOR "RPM")
